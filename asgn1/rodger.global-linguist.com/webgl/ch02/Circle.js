@@ -4,7 +4,7 @@ class Circle{
     this.position = [0.0, 0.0, 0.0];
     this.color = [1.0,1.0,1.0,1.0];
     this.size = 5.0;
-    this.segments = 30;
+    this.segments = 10;
   }
 
   render() {
@@ -18,7 +18,8 @@ class Circle{
     // Draw
     var d = this.size/200.0; // delta
 
-    let angleStep=360/this.segments;
+    this.segments = g_selectedSegments;
+    let angleStep = 360 / this.segments;
     for(var angle = 0; angle < 360; angle=angle+angleStep) {
       let centerPt= [xy[0], xy[1]];
       let angle1=angle;

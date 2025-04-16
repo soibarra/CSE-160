@@ -75,6 +75,7 @@ const SMUDGE = 3;
 let g_selectedColor=[1.0,1.0,1.0,1.0];
 let g_selectedSize=10;
 let g_selectedType=POINT;
+let g_selectedSegments = 30;
 
 // Set actions for the HTMl UI elements
 function addActionsForHtmlUI(){
@@ -107,6 +108,10 @@ function addActionsForHtmlUI(){
   // Size Slider Events
   document.getElementById('sizeSlide').addEventListener('mouseup', function() {
     g_selectedSize = parseFloat(this.value);
+  });
+
+  document.getElementById('segmentsSlide').addEventListener('mouseup', function() {
+    g_selectedSegments = parseInt(this.value);
   });
 }
 
