@@ -69,6 +69,7 @@ function connectVariablesToGLSL(){
 const POINT = 0;
 const TRIANGLE = 1;
 const CIRCLE = 2;
+const SMUDGE = 3;
 
 //Globals related UI elements
 let g_selectedColor=[1.0,1.0,1.0,1.0];
@@ -81,7 +82,17 @@ function addActionsForHtmlUI(){
   //Button Events (Shape Type)
   document.getElementById('green').onclick = function() { g_selectedColor = [0.0, 1.0, 0.0, 1.0]; };
   document.getElementById('red').onclick = function() { g_selectedColor = [1.0, 0.0, 0.0, 1.0]; };
-  document.getElementById('clearButton').onclick = function() { g_shapesList= []; renderAllShapes();};
+  document.getElementById('clearButton').onclick = function() { 
+    g_shapesList= []; 
+    g_prevX = null; 
+    g_prevY = null; 
+    renderAllShapes();
+  };
+  document.getElementById('smudgeButton').onclick = function() {
+    g_selectedType = SMUDGE;
+    g_prevX = null;
+    g_prevY = null;
+  };
 
   document.getElementById('pointButton').onclick = function() { g_selectedType=POINT};
   document.getElementById('triButton').onclick = function() { g_selectedType=TRIANGLE };
@@ -109,9 +120,23 @@ function main() {
   addActionsForHtmlUI();
 
   // Register function (event handler) to be called on a mouse press
-  canvas.onmousedown = click;
+  canvas.onmousedown = function(ev) {
+  if (g_selectedType !== SMUDGE) {
+    g_prevX = null;
+    g_prevY = null;
+    click(ev);
+  }
+};
+
   //canvas.onmousemove = click;
   canvas.onmousemove = function(ev) { if(ev.buttons == 1) { click(ev) } };
+
+  canvas.onmouseup = function(ev) {
+  if (g_selectedType === SMUDGE) {
+    g_prevX = null;
+    g_prevY = null;
+  }
+};
 
   // Specify the color for clearing <canvas>
   gl.clearColor(0.0, 0.0, 0.0, 1.0);
@@ -126,25 +151,55 @@ var g_shapesList = [];
 //var g_colors = [];  // The array to store the color of a point
 //var g_sizes = []; // The array to store the size of a point
 
-function click(ev) {
+let g_prevX = null;
+let g_prevY = null;
 
-  //Extract the event click and return it in WebGL coordinates
+function click(ev) {
   let [x, y] = convertCoordinatesEventToGL(ev);
 
-  // Create and store the new point
+  // Special handling for SMUDGE: skip first point to avoid connecting strokes
+  // SMUDGE brush: only draw if we have a previous point
+  if (g_selectedType === SMUDGE) {
+    if (g_prevX === null || g_prevY === null) {
+      g_prevX = x;
+      g_prevY = y;
+      return; // first smudge point, don’t draw
+    }
+
+    let smudge = new SmudgeBrush();
+    smudge.position = [x, y];
+    smudge.color = g_selectedColor.slice();
+    smudge.size = g_selectedSize;
+
+    g_shapesList.push(smudge);
+
+    renderAllShapes();
+
+    g_prevX = x;
+    g_prevY = y;
+    return;
+  }
+
   let point;
   if (g_selectedType == POINT) {
     point = new Point();
-  } else if (g_selectedType == TRIANGLE) {
+    } else if (g_selectedType == TRIANGLE) {
     point = new Triangle();
-  } else {
+    } else if (g_selectedType == CIRCLE) {
     point = new Circle();
   }
-  
-  point.position = [x,y];
+
+  point.position = [x, y];
   point.color = g_selectedColor.slice();
   point.size = g_selectedSize;
+
   g_shapesList.push(point);
+  renderAllShapes();
+
+  g_prevX = null;
+  g_prevY = null;
+}
+ 
 
   //Store teh coordinates to g_points array
   //g_points.push([x,y]);
@@ -163,10 +218,6 @@ function click(ev) {
 //    g_colors.push([1.0, 1.0, 1.0, 1.0]);  // White
 //  }
 
-  //Draw every shape that is supposed to be in teh canvas
-  renderAllShapes();
-
-}
 
 //Extract teh event click and return it in WebGL coordinates
 function convertCoordinatesEventToGL(ev){
@@ -226,8 +277,17 @@ function drawPicture() {
   // Optional: clear canvas (uncomment to wipe current drawing)
   // gl.clear(gl.COLOR_BUFFER_BIT);
 
-  // Set drawing color to white
-  let color = [1.0, 1.0, 1.0, 1.0];
+  const colors = [
+    [0.9, 1.0, 0.9, 1.0],  // Mint Green 0
+    [0.7, 1.0, 0.7, 1.0],  // Light Green 1
+    [0.5, 0.9, 0.5, 1.0],  // Pastel Green 2
+    [0.3, 0.8, 0.3, 1.0],  // Medium Green 3
+    [0.1, 0.6, 0.1, 1.0],  // Grass Green 4
+    [0.0, 0.5, 0.0, 1.0],  // Standard Green 5
+    [0.0, 0.4, 0.0, 1.0],  // Deep Green 6
+    [0.0, 0.3, 0.0, 1.0],  // Forest Green 7
+    [0.0, 0.2, 0.0, 1.0],  // Dark Green 8
+  ];
 
   // Normalizes coordinates from 16x15 graph to WebGL (-1 to 1)
   function normalize(x, y) {
@@ -238,14 +298,48 @@ function drawPicture() {
   }
 
   // Draw triangle from grid coordinates
-  function drawTri(x1, y1, x2, y2, x3, y3) {
+  function drawTri(x1, y1, x2, y2, x3, y3, color = [1.0, 1.0, 1.0, 1.0]) {
     let p1 = normalize(x1, y1);
     let p2 = normalize(x2, y2);
     let p3 = normalize(x3, y3);
+  
     gl.uniform4f(u_FragColor, color[0], color[1], color[2], color[3]);
     drawTriangle(gl, [...p1, ...p2, ...p3]);
   }
 
   // Draw each triangle using drawTri(x1, y1, x2, y2, x3, y3)
-  drawTri(6,1, 8,1, 8,2.5);     // Head
+  drawTri(6,1, 8,1, 8,2.5, colors[6]); //1
+  drawTri(5,2, 6,2, 6,3.4, colors[6]); //2
+  drawTri(7,2, 7,4, 5,4, colors[4]); //3
+  drawTri(7,1.8, 7,5, 10,4, colors[3]); //4
+  drawTri(9,3, 10,4, 12,1, colors[2]) //5
+  drawTri(11,2, 12,1, 14,3, colors[7]);//6
+  drawTri(13,4, 14,3, 15,5, colors[7]); //7
+  drawTri(2,3, 4,4, 3.5,5.5, colors[6]); //8
+  drawTri(1,5, 3,6, 3.5,5.5, colors[6]); //9
+  drawTri(4,4, 3,6, 7,7, colors[4]); //10
+  drawTri(4,4, 7,7, 8,6, colors[3]); //11
+  drawTri(7,5, 10,4, 9,5, colors[4]); //12
+  drawTri(10,4, 10,5, 9,5, colors[7]); //13
+  drawTri(3,6, 5,8, 7,7, colors[3]); //14
+  drawTri(7,7, 8,6, 8,7, colors[7]); //15
+  drawTri(8,6, 11,7, 10,10, colors[7]); //16
+  drawTri(11,7, 10,10, 12,9, colors[8]); //17
+  drawTri(11,7, 13,7, 12,9, colors[7]); //18
+  drawTri(10,10, 12,9, 14,11, colors[7]); //19
+  drawTri(5,8, 7,7, 8,10, colors[3]); //20
+  drawTri(7,7, 8,8, 7.5,9.5, colors[7]); //21
+  drawTri(5,8, 6,10, 8,10, colors[3]); //22
+  drawTri(7.5,9.5, 8,10, 9,10, colors[7]); //23
+  drawTri(6,10, 8,10, 8,12, colors[3]); //24
+  drawTri(8,10, 8,12, 10,12, colors[7]); //25
+  drawTri(4,10, 6,10, 4.4,9.5, colors[4]); //26
+  drawTri(3,11, 6,10, 4,10, colors[6]); //27
+  drawTri(3,11, 5,12, 6,10, colors[2]); //28
+  drawTri(6,10, 5,12, 8,12, colors[3]); //29
+  drawTri(5,12, 8,12, 7,13, colors[7]); //30
+  drawTri(5,12, 7,14, 7,13, colors[7]); //31
+  drawTri(8,12, 7,13, 9,14, colors[7]); //32
+  drawTri(4,4, 7,4, 7,5.5, colors[3]); //33
+  drawTri(6,5, 8,6, 9,5, colors[3]); //34
 }

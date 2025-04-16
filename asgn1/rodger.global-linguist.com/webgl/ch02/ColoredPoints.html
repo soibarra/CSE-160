@@ -1,3 +1,9 @@
+Sofia Ibarra
+soibarra@ucsc.edu
+
+Notes to Grader:
+Try the “Smudge Brush”, it uses alpha blending and aligns triangle strokes to your brush direction to simulate real paint and soft fading. It's smoother and more natural than a point brush.
+
 <!DOCTYPE html>
 <html lang="en">
   <head>
@@ -38,7 +44,6 @@
         <!-- Reference image: a picture of your drawing -->
         <img id="refPic" src="IMG_7448.HEIC" alt="Reference Drawing" width="200" />
       </div>
-    </div>
     
     <!-- Other controls -->
     <p id="numdot">XXX</p>
@@ -52,6 +57,7 @@
       <button type="button" id="triButton">Triangle</button>
       <button type="button" id="circleButton">Circle</button>
       <button type="button" id="drawPicButton">Draw Picture</button>
+      <button type="button" id="smudgeButton">Smudge Brush</button>
     </p>
     
     <p>
@@ -74,6 +80,7 @@
     <script src="Circle.js"></script>
     <script src="Triangle.js"></script>
     <script src="Point.js"></script>
+    <script src="SmudgeBrush.js"></script>
     <script src="ColoredPoints.js"></script>
   </body>
 </html>
