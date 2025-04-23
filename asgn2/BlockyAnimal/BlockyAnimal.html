@@ -2,7 +2,6 @@ Sofia Ibarra
 soibarra@ucsc.edu
 
 Notes to Grader:
-“Smudge Brush”:it uses alpha blending and aligns triangle strokes to your brush direction to simulate real paint and soft fading.
 
 <!DOCTYPE html>
 <html lang="en">
@@ -12,10 +11,7 @@ Notes to Grader:
     <style>
       /* Container that holds both the canvas and the sidebar */
       .container {
-        display: flex;
-        flex-direction: row;
-        align-items: flex-start;
-        margin-bottom: 20px;
+        display: block;
       }
       
       /* The canvas container takes up the main space */
@@ -23,10 +19,6 @@ Notes to Grader:
         flex: 1;
       }
       
-      /* Sidebar with the reference image */
-      .sidebar {
-        margin-left: 20px;
-      }
     </style>
   </head>
 
@@ -39,11 +31,6 @@ Notes to Grader:
         </canvas>
       </div>
       
-      <!-- Sidebar with the reference photo -->
-      <div class="sidebar">
-        <!-- Reference image: a picture of your drawing -->
-        <img id="refPic" src="Dragon_drawing" alt="Reference Drawing" width="200" />
-      </div>
     </div>
     
     <!-- Other controls -->
@@ -57,8 +44,7 @@ Notes to Grader:
       <button type="button" id="pointButton">Point</button>
       <button type="button" id="triButton">Triangle</button>
       <button type="button" id="circleButton">Circle</button>
-      <button type="button" id="drawPicButton">Draw Picture</button>
-      <button type="button" id="smudgeButton">Smudge Brush</button>
+      <button type="button" id="cubeButton">Cube</button>
     </p>
     
     <p>

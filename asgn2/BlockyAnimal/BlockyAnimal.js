@@ -69,7 +69,8 @@ function connectVariablesToGLSL(){
 const POINT = 0;
 const TRIANGLE = 1;
 const CIRCLE = 2;
-const SMUDGE = 3;
+//const SMUDGE = 3;
+const CUBE = 4;
 
 //Globals related UI elements
 let g_selectedColor=[1.0,1.0,1.0,1.0];
@@ -98,7 +99,7 @@ function addActionsForHtmlUI(){
   document.getElementById('pointButton').onclick = function() { g_selectedType=POINT};
   document.getElementById('triButton').onclick = function() { g_selectedType=TRIANGLE };
   document.getElementById('circleButton').onclick = function() { g_selectedType=CIRCLE };
-  document.getElementById('drawPicButton').onclick = drawPicture;
+  document.getElementById('cubeButton').onclick = function() { g_selectedType = CUBE; };
   
   // Slider Events
   document.getElementById('redSlide').addEventListener('mouseup', function() {g_selectedColor[0] = this.value/100; });
@@ -123,25 +124,12 @@ function main() {
   connectVariablesToGLSL();
   
   addActionsForHtmlUI();
-
-  // Register function (event handler) to be called on a mouse press
   canvas.onmousedown = function(ev) {
-  if (g_selectedType !== SMUDGE) {
-    g_prevX = null;
-    g_prevY = null;
     click(ev);
-  }
-};
+  };
 
   //canvas.onmousemove = click;
   canvas.onmousemove = function(ev) { if(ev.buttons == 1) { click(ev) } };
-
-  canvas.onmouseup = function(ev) {
-  if (g_selectedType === SMUDGE) {
-    g_prevX = null;
-    g_prevY = null;
-  }
-};
 
   // Specify the color for clearing <canvas>
   gl.clearColor(0.0, 0.0, 0.0, 1.0);
@@ -162,15 +150,6 @@ let g_prevY = null;
 function click(ev) {
   let [x, y] = convertCoordinatesEventToGL(ev);
 
-  // Special handling for SMUDGE: skip first point to avoid connecting strokes
-  // SMUDGE brush: only draw if we have a previous point
-  if (g_selectedType === SMUDGE) {
-    if (g_prevX === null || g_prevY === null) {
-      g_prevX = x;
-      g_prevY = y;
-      return; // first smudge point, don’t draw
-    }
-
     let smudge = new SmudgeBrush();
     smudge.position = [x, y];
     smudge.color = g_selectedColor.slice();
@@ -183,15 +162,17 @@ function click(ev) {
     g_prevX = x;
     g_prevY = y;
     return;
-  }
+
 
   let point;
   if (g_selectedType == POINT) {
     point = new Point();
-    } else if (g_selectedType == TRIANGLE) {
+  } else if (g_selectedType == TRIANGLE) {
     point = new Triangle();
-    } else if (g_selectedType == CIRCLE) {
+  } else if (g_selectedType == CIRCLE) {
     point = new Circle();
+  } else if (g_selectedType == CUBE) {
+    point = new Cube();
   }
 
   point.position = [x, y];
@@ -203,8 +184,8 @@ function click(ev) {
 
   g_prevX = null;
   g_prevY = null;
+
 }
- 
 
   //Store teh coordinates to g_points array
   //g_points.push([x,y]);
