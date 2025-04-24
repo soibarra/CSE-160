@@ -1,5 +1,6 @@
 class Triangle{
 
+  
   //Constructor
   constructor(){
     this.type = 'triangle';
@@ -21,7 +22,8 @@ class Triangle{
     gl.uniform4f(u_FragColor, rgba[0], rgba[1], rgba[2], rgba[3]);
 
     // Pass the color of a pont to a u_FragColor variable
-    gl.uniform1f(u_Size, size);
+    const identity = new Matrix4();
+    gl.uniformMatrix4fv(u_ModelMatrix, false, identity.elements);
 
     // Draw
     //gl.drawArrays(gl.POINTS, 0, 1);
@@ -31,12 +33,13 @@ class Triangle{
     drawTriangle(gl, [xy[0], xy[1], xy[0]+d, xy[1], xy[0], xy[1]+d] );
   }
 }
-  
+
+
 function drawTriangle(gl, vertices) {
 //  var vertices = new Float32Array([
 //    0, 0.5,   -0.5, -0.5,   0.5, -0.5
 //  ]);
-  const n = 3; // The number of vertices
+  const n = 3;
 
   // Create a buffer object
   
@@ -68,6 +71,7 @@ function drawTriangle(gl, vertices) {
 
 //  return n;
 }
+
 
 function drawTriangle3D(gl, vertices) {
     const n = 3; // The number of vertices

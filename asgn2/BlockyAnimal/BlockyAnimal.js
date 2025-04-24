@@ -2,12 +2,12 @@
 // Vertex shader program
 var VSHADER_SOURCE = `
   attribute vec4 a_Position;
-  uniform float u_Size;
+  uniform mat4 u_ModelMatrix;
+  uniform mat4 u_GlobalRotateMatrix;
   void main() {
-    gl_Position = a_Position;
-    gl_PointSize = u_Size;
+    gl_Position = u_GlobalRotateMatrix * u_ModelMatrix * a_Position;
   }`
-
+  //uniform float u_Size;
 // Fragment shader program
 var FSHADER_SOURCE = `
   precision mediump float;
@@ -22,6 +22,8 @@ let gl;
 let a_Position;
 let u_FragColor;
 let u_Size;
+let u_ModelMatrix;
+let u_GlobalRotateMatrix;
 
 function setupWebGL (){ //***dont change this for the rest of the quarter***
     // Retrieve <canvas> element
@@ -34,8 +36,10 @@ function setupWebGL (){ //***dont change this for the rest of the quarter***
     console.log('Failed to get the rendering context for WebGL');
     return;
   }
+  gl.enable(gl.DEPTH_TEST);
 }
 
+//CHECK THIS
 function connectVariablesToGLSL(){
   // Initialize shaders
   if (!initShaders(gl, VSHADER_SOURCE, FSHADER_SOURCE)) {
@@ -57,112 +61,44 @@ function connectVariablesToGLSL(){
     return;
   }
 
-  //Get the storage Location of u_Size
-  u_Size = gl.getUniformLocation(gl.program, 'u_Size');
-  if (!u_Size) {
-    console.log('Failed to get the storage location of u_Size');
+  u_ModelMatrix = gl.getUniformLocation(gl.program, 'u_ModelMatrix');
+  if (!u_ModelMatrix) {
+    console.log('Failed to get the storage location of u_ModelMatrix');
     return;
   }
+
+  u_GlobalRotateMatrix = gl.getUniformLocation(gl.program, 'u_GlobalRotateMatrix');
+  if (!u_GlobalRotateMatrix) {
+    console.log('Failed to get the storage location of u_GlobalRotateMatrix');
+    return;
+  }
+
+  // Set an initial value for this matrix
+  var identityM = new Matrix4();
+  gl.uniformMatrix4fv(u_ModelMatrix, false, identityM.elements);
+
+
 }
 
 //Constants
 const POINT = 0;
 const TRIANGLE = 1;
 const CIRCLE = 2;
-//const SMUDGE = 3;
-const CUBE = 4;
 
-//Globals related UI elements
-let g_selectedColor=[1.0,1.0,1.0,1.0];
-let g_selectedSize=10;
-let g_selectedType=POINT;
-let g_selectedSegments = 30;
-
-// Set actions for the HTMl UI elements
-function addActionsForHtmlUI(){
-
-  //Button Events (Shape Type)
-  document.getElementById('green').onclick = function() { g_selectedColor = [0.0, 1.0, 0.0, 1.0]; };
-  document.getElementById('red').onclick = function() { g_selectedColor = [1.0, 0.0, 0.0, 1.0]; };
-  document.getElementById('clearButton').onclick = function() { 
-    g_shapesList= []; 
-    g_prevX = null; 
-    g_prevY = null; 
-    renderAllShapes();
-  };
-  document.getElementById('smudgeButton').onclick = function() {
-    g_selectedType = SMUDGE;
-    g_prevX = null;
-    g_prevY = null;
-  };
-
-  document.getElementById('pointButton').onclick = function() { g_selectedType=POINT};
-  document.getElementById('triButton').onclick = function() { g_selectedType=TRIANGLE };
-  document.getElementById('circleButton').onclick = function() { g_selectedType=CIRCLE };
-  document.getElementById('cubeButton').onclick = function() { g_selectedType = CUBE; };
-  
-  // Slider Events
-  document.getElementById('redSlide').addEventListener('mouseup', function() {g_selectedColor[0] = this.value/100; });
-  document.getElementById('greenSlide').addEventListener('mouseup', function() {g_selectedColor[1] = this.value/100; });
-  document.getElementById('blueSlide').addEventListener('mouseup', function() {g_selectedColor[2] = this.value/100;});
-
-  // Size Slider Events
-  document.getElementById('sizeSlide').addEventListener('mouseup', function() {
-    g_selectedSize = parseFloat(this.value);
-  });
-
-  document.getElementById('segmentsSlide').addEventListener('mouseup', function() {
-    g_selectedSegments = parseInt(this.value);
-  });
-}
-
-function main() {
-
-  //Set up canvas and gL variables
-  setupWebGL();
-  // Set up GLSL shader programs and connect GLSL variables
-  connectVariablesToGLSL();
-  
-  addActionsForHtmlUI();
-  canvas.onmousedown = function(ev) {
-    click(ev);
-  };
-
-  //canvas.onmousemove = click;
-  canvas.onmousemove = function(ev) { if(ev.buttons == 1) { click(ev) } };
-
-  // Specify the color for clearing <canvas>
-  gl.clearColor(0.0, 0.0, 0.0, 1.0);
-
-  // Clear <canvas>
-  gl.clear(gl.COLOR_BUFFER_BIT);
-}
-
-var g_shapesList = [];
-
-//var g_points = [];  // The array for the position of a mouse press
-//var g_colors = [];  // The array to store the color of a point
-//var g_sizes = []; // The array to store the size of a point
-
-let g_prevX = null;
-let g_prevY = null;
+// Gloabls related UI elements
+let g_selectedColor = [1.0,1.0,1.0,1.0];
+let g_selectedSize = 5;
+let g_selectedType = POINT;
+let g_globalAngle = 0;
+let g_yellowAngle = 0;
+let g_magentaAngle = 0;
+let g_yellowAnimation=false;
+let g_magentaAnimation=false;
 
 function click(ev) {
+
+  //Extract teh event click and return it in WebGL coordinates
   let [x, y] = convertCoordinatesEventToGL(ev);
-
-    let smudge = new SmudgeBrush();
-    smudge.position = [x, y];
-    smudge.color = g_selectedColor.slice();
-    smudge.size = g_selectedSize;
-
-    g_shapesList.push(smudge);
-
-    renderAllShapes();
-
-    g_prevX = x;
-    g_prevY = y;
-    return;
-
 
   let point;
   if (g_selectedType == POINT) {
@@ -181,32 +117,77 @@ function click(ev) {
 
   g_shapesList.push(point);
   renderAllShapes();
-
-  g_prevX = null;
-  g_prevY = null;
-
 }
 
-  //Store teh coordinates to g_points array
-  //g_points.push([x,y]);
+// Set actions for the HTMl UI elements
+function addActionsForHtmlUI(){
 
-  // Store the colors to g_points array
-  //g_colors.push(g_selectedColor.slice());
-
-  //Store the size of the g _sizesarray
-  //g_sizes.push(g_selectedSize);
+  //Button Events
+  document.getElementById('animationYellowOffButton').onclick = function() { g_yellowAnimation=false; };
+  document.getElementById('animationYellowOnButton').onclick = function() { g_yellowAnimation=true; };
   
-//  if (x >= 0.0 && y >= 0.0) {      // First quadrant
-//    g_colors.push([1.0, 0.0, 0.0, 1.0]);  // Red
-//  } else if (x < 0.0 && y < 0.0) { // Third quadrant
-//    g_colors.push([0.0, 1.0, 0.0, 1.0]);  // Green
-//  } else {                         // Others
-//    g_colors.push([1.0, 1.0, 1.0, 1.0]);  // White
-//  }
+  // Color Slider Events
+  document.getElementById('yellowSlide').addEventListener('mouseup', function() {g_yellowAngle[0] = this.value; renderAllShapes(); }); //fix the end of this
+  document.getElementById('magentaSlide').addEventListener('mouseup', function() {g_magentaAngle[1] = this.value; renderAllShapes(); }); //fix the end of this
 
+  // Size Slider Events
+  document.getElementById('angleSlide').addEventListener('mousemove', function() {g_globalAngle = Number(this.value); renderAllShapes(); });
+}
+
+function main() {
+
+  //Set up canvas and gL variables
+  setupWebGL();
+  // Set up GLSL shader programs and connect GLSL variables
+  connectVariablesToGLSL();
+  // Set up actions for the HTML UI elements
+  addActionsForHtmlUI();
+
+  // Register function (event handler) to be called on a mouse press
+  canvas.onmousedown = click; //idk if i should remove this
+  canvas.onmousemove = function(ev) { if(ev.buttons == 1) { click(ev) } };
+
+  // Specify the color for clearing <canvas>
+  gl.clearColor(0.0, 0.0, 0.0, 1.0);
+
+
+  // Render
+  //gl.clear(gl.COLOR_BUFFER_BIT);
+  //renderAllShapes();
+  requestAnimationFrame(tick);
+}
+
+var g_startTime = performance.now()/1000.0;
+var g_seconds = performance.now()/1000.0-g_startTime;
+
+// Called by browser repeatedly whenever its time
+function tick() {
+  // Save the current time
+  g_seconds = performance.now()/1000.0-g_startTime;
+  //console.log(g_seconds);
+
+  //Update Animation Angles
+  updateAnimationAngles();
+
+  //Draw everything
+  renderAllShapes();
+
+  //Tell teh browser to update again when it has time
+  requestAnimationFrame(tick);
+}
+
+function updateAnimationAngles() {
+  if (g_yellowAnimation) {
+    g_yellowAngle = (45*Math.sin(g_seconds));
+  }
+  if (g_magentaAnimation) {
+    g_magentaAngle = (45*Math.sin(3*g_seconds)); // the 3* makes it faster
+  }
+  //add the rest of my animation angles
+}
 
 //Extract teh event click and return it in WebGL coordinates
-function convertCoordinatesEventToGL(ev){
+/*function convertCoordinatesEventToGL(ev){
   var x = ev.clientX; // x coordinate of a mouse pointer
   var y = ev.clientY; // y coordinate of a mouse pointer
   var rect = ev.target.getBoundingClientRect();
@@ -216,28 +197,90 @@ function convertCoordinatesEventToGL(ev){
   
   return([x,y]);
 }
+*/
 
 //Draw every shape that is supposed to be in the canvas
 function renderAllShapes() {
 
   //check the time at the stat of this function
   var startTime = performance.now();
+
+  //console.log(g_globalAngle)
+
+  var globalRotMat=new Matrix4().setRotate(g_globalAngle,0,1,0);
+  gl.uniformMatrix4fv(u_GlobalRotateMatrix, false, globalRotMat.elements);
   
   // Clear <canvas>
-  gl.clear(gl.COLOR_BUFFER_BIT);
+  gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+  //gl.clear(gl.COLOR_BUFFER_BIT );
 
   //var len = g_points.length;
-  var len = g_shapesList.length;
-  
-  for(var i = 0; i < len; i++) {
+  //var len = g_shapesList.length;
+  //for(var i = 0; i < len; i++) {
+  // g_shapesList[i].render();
+  //}
 
-    g_shapesList[i].render();
-    
-  }
+  //Draw test triangle
+  //drawTriangle3D(gl, [-1.0,0.0,0.0, -0.5,-1.0,0.0, 0.0,0.0,0.0] );
+
+  /*Draw a cube
+  const body = new Cube();
+  body.color = [1.0, 0.0, 0.0, 1.0];
+  body.matrix.setTranslate(0.0, 0.0, 0);
+  body.matrix.scale(1.0, 1.0, 1.0);
+  body.render();
+  */
+
+  //Draw the body cube
+  var body = new Cube();
+  body.color = [1.0, 0.0, 0.0, 1.0];
+  body.matrix.translate(-.25, -.75, 0.0);
+  body.matrix.rotate(-5, 1, 0, 0);
+  body.matrix.scale(0.5, .3, .5);
+  body.render();
+
+  //Draw a left arm
+  var yellow = new Cube();
+  yellow.color = [1.0, 1.0, 0.0, 1.0];
+  yellow.matrix.setTranslate(0, -.5, 0.0);
+  yellow.matrix.rotate(-5, 1, 0, 0);
+
+  yellow.matrix.rotate(-g_yellowAngle, 0,0,1);
+  
+  //if (g_yellowAnimation) {
+  //  yellow.matrix.rotate(45*Math.sin(g_seconds), 0,0,1);
+  //} else {
+  //  yellow.matrix.rotate(-g_yellowAngle, 0,0,1);
+  //}
+
+  var yellowCoordinatesMat=new Matrix4(yellow.matrix);
+  yellow.matrix.scale(0.25, .7, .5);
+  yellow.matrix.translate(-.5,0,0);
+  yellow.render();
+
+  // Test box
+  var magenta = new Cube();
+  magenta.color = [1,0,1,1];
+  magenta.matrix = yellowCoordinatesMat;
+  magenta.matrix.translate(0, 0.65, 0);
+  magenta.matrix.rotate(g_magentaAngle, 0,0,1);
+  magenta.matrix.scale(.3, .3, .3);
+  magenta.matrix.translate(-.5,0, -0.001)
+  magenta.render();
+
+  //A bunch of rotating cubes
+  /*var K=300.0; //if you change this to 200, it shrinks them all down liek little lines; 1000 causes slower fps
+  for (var i=1; i<K; i++) {
+    var c = new Cube();
+    c.matrix.translate(-.8,1.9*i/K-1.0,0);
+    c.matrix.rotate(g_seconds*100,1,1,1);
+    c.matrix.scale(.1, 0.5/K, 1.0/K);
+  c.render();
+  }*/
 
   //Check the time at the end of the function, and show on web page
   var duration = performance.now() - startTime;
-  sendTextToHTML("numdot: " + len + " ms: " + Math.floor(duration) + " fps: " + Math.floor(10000/duration)/10, "numdot");
+  sendTextToHTML(" ms: " + Math.floor(duration) + " fps: " + Math.floor(10000/duration)/10, "numdot");
 
 }
   
@@ -255,6 +298,6 @@ function sendTextToHTML(text, htmlID) {
   htmlElm.innerHTML = text;
 }
 
-function normalize(x, y) {
-  return [(x / 5) - 1, (y / 5) - 1];
-}
+var g_shapesList = [];
+
+

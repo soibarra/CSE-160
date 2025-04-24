@@ -1,36 +1,45 @@
 class Cube {
   constructor() {
     this.type = 'cube';
-    this.color = [1.0, 1.0, 1.0, 1.0];
-    this.position = [0.0, 0.0, 0.0];
-    this.size = 5.0;
-    this.matrix = new Matrix4(); // For transformations if needed later
+    this.color = [1.0, 0.0, 0.0, 1.0];
+    this.matrix = new Matrix4();
   }
 
   render() {
-    var xy = this.position;
-    var rgba = this.color;
-    
-    // Set color
+    const rgba = this.color;
+
+    // Pass the color
     gl.uniform4f(u_FragColor, rgba[0], rgba[1], rgba[2], rgba[3]);
 
-    // Scale size
-    var d = this.size / 200.0;
+    // Pass the matrix
+    gl.uniformMatrix4fv(u_ModelMatrix, false, this.matrix.elements);
 
-    // Vertices of a cube face centered at this.position
-    // You can adjust these later to match your intended "blocky animal" body
-    drawTriangle3D([
-      xy[0],     xy[1],     0.0,
-      xy[0]+d,   xy[1],     0.0,
-      xy[0]+d,   xy[1]+d,   0.0,
-    ]);
+
+    // Front of cube
+    drawTriangle3D(gl, [0,0,0, 1,1,0, 1,0,0 ]);
+    drawTriangle3D(gl, [0,0,0, 0,1,0, 1,1,0 ]);
+
+    //Pass the color of a point to u_FragColor uniform variable
+    gl.uniform4f(u_FragColor, rgba[0]*.9, rgba[1]*.9, rgba[2]*.9, rgba[3]);
+
+    // Back of cube
+    drawTriangle3D(gl, [0,0,1, 1,0,1, 1,1,1]);
+    drawTriangle3D(gl, [0,0,1, 1,1,1, 0,1,1]);
+    // Top of cube
+    drawTriangle3D(gl, [0,1,0, 0,1,1, 1,1,1]);
+    drawTriangle3D(gl, [0,1,0, 1,1,1, 1,1,0]);
+
+   // Bottom of cube
+    drawTriangle3D(gl, [0,0,0, 1,0,1, 0,0,1]);
+    drawTriangle3D(gl, [0,0,0, 1,0,0, 1,0,1]);
+
+    // Right of cube
+    drawTriangle3D(gl, [1,0,0, 1,1,1, 1,0,1]);
+    drawTriangle3D(gl, [1,0,0, 1,1,0, 1,1,1]);
+
+    // Left of cube
+    drawTriangle3D(gl, [0,0,0, 0,0,1, 0,1,1]);
+    drawTriangle3D(gl, [0,0,0, 0,1,1, 0,1,0]);
     
-    drawTriangle3D([
-      xy[0],     xy[1],     0.0,
-      xy[0]+d,   xy[1]+d,   0.0,
-      xy[0],     xy[1]+d,   0.0,
-    ]);
-
-    // TODO: Add top, bottom, left, right, back faces
   }
 }

@@ -18,8 +18,7 @@ class Circle{
     // Draw
     var d = this.size/200.0; // delta
 
-    this.segments = g_selectedSegments;
-    let angleStep = 360 / this.segments;
+    let angleStep=360/this.segments;
     for(var angle = 0; angle < 360; angle=angle+angleStep) {
       let centerPt= [xy[0], xy[1]];
       let angle1=angle;
