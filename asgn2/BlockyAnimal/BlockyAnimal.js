@@ -95,30 +95,6 @@ let g_magentaAngle = 0;
 let g_yellowAnimation=false;
 let g_magentaAnimation=false;
 
-function click(ev) {
-
-  //Extract teh event click and return it in WebGL coordinates
-  let [x, y] = convertCoordinatesEventToGL(ev);
-
-  let point;
-  if (g_selectedType == POINT) {
-    point = new Point();
-  } else if (g_selectedType == TRIANGLE) {
-    point = new Triangle();
-  } else if (g_selectedType == CIRCLE) {
-    point = new Circle();
-  } else if (g_selectedType == CUBE) {
-    point = new Cube();
-  }
-
-  point.position = [x, y];
-  point.color = g_selectedColor.slice();
-  point.size = g_selectedSize;
-
-  g_shapesList.push(point);
-  renderAllShapes();
-}
-
 // Set actions for the HTMl UI elements
 function addActionsForHtmlUI(){
 
@@ -300,4 +276,26 @@ function sendTextToHTML(text, htmlID) {
 
 var g_shapesList = [];
 
+function click(ev) {
 
+  //Extract teh event click and return it in WebGL coordinates
+  let [x, y] = convertCoordinatesEventToGL(ev);
+
+  let point;
+  if (g_selectedType == POINT) {
+    point = new Point();
+  } else if (g_selectedType == TRIANGLE) {
+    point = new Triangle();
+  } else if (g_selectedType == CIRCLE) {
+    point = new Circle();
+  } else if (g_selectedType == CUBE) {
+    point = new Cube();
+  }
+
+  point.position = [x, y];
+  point.color = g_selectedColor.slice();
+  point.size = g_selectedSize;
+
+  g_shapesList.push(point);
+  renderAllShapes();
+}
