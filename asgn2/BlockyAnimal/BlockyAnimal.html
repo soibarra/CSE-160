@@ -1,57 +1,38 @@
-Sofia Ibarra
-soibarra@ucsc.edu
-
-Notes to Grader:
-
 <!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <title>Blocky Animal</title>
-  <head>
-      /* Container that holds both the canvas and the sidebar */
-      .container {
-        display: block;
-      }
-      
-      /* The canvas container takes up the main space */
-      .canvas-container {
-        flex: 1;
-      }
-
-  <body onload="main()">
-    <canvas id="webgl" width="400" height="400">
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Blocky Animal</title>
+</head>
+<body onload="main()">
+  <canvas id="webgl" width="400" height="400">
     Please use a browser that supports "canvas"
-    </canvas>
-      <p>
-    
-    <!-- Other controls -->
-    <p id="numdot">XXX</p>
-    
-    <button type="button" id="green">X</button>
-    <button type="button" id="red">X</button>
-
-    <button type="button" id="clearButton">X</button>
-    <p>
-
-    <button type="button" id="pointButton">X</button>
-    <button type="button" id="triButton">X</button>
-    <button type="button" id="circleButton">X</button>
-
-    <p>
-    X <input type="range" min="0" max="100" value="100" class="slider" id="redSlide">
-    <p>
-    Magenta <input type="range" min="-45" max="45" value="0" class="slider" id="magentaSlide">
-    <p>
-    Yellow <input type="range" min="-45" max="45" value="0" class="slider" id="yellowSlide">
-    Animation:
-    <button type="button" id="animationYellowOnButton">ON</button>
-    <button type="button" id="animationYellowOffButton">OFF</button>
-
-    <p>
-    Camera Angle <input type="range" min="0" max="90" value="5" class="slider" id="angleSlide">
-    <p>
-    
+  </canvas>
+  <p>
+    <input type="range" min="-180" max="180" value="0" id="angleSlide">
+    <label for="angleSlide">Camera Angle</label>
+  </p>
+  <p>
+    <input type="range" min="-90" max="90" value="30" id="tiltSlide">
+    <label for="tiltSlide">Tilt Angle</label>
+  </p>
+  <p>
+    <input type="range" min="0" max="100" value="0" id="headSlide">
+    <label for="headSlide">Head Angle</label>
+  </p>
+  <p>
+    <input type="range" min="0" max="100" value="0" id="yellowSlide">
+    <label for="yellowSlide">Yellow Angle</label>
+  </p>
+  <p>
+    <input type="range" min="0" max="100" value="0" id="magentaSlide">
+    <label for="magentaSlide">Magenta Angle</label>
+  </p>
+  <p>
+    <button type="button" id="animationYellowOnButton">Yellow Animation ON</button>
+    <button type="button" id="animationYellowOffButton">Yellow Animation OFF</button>
+  </p>
+  <p id="numdot">fps</p>
     <!-- JavaScript files -->
     <script src="lib/webgl-utils.js"></script>
     <script src="lib/webgl-debug.js"></script>
