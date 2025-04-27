@@ -17,31 +17,75 @@
     <label for="tiltSlide">Tilt Angle</label>
   </p>
   <p>
-    <input type="range" min="0" max="100" value="0" id="headSlide">
-    <label for="headSlide">Head Angle</label>
+    <input type="range" min="-45" max="45" value="0" id="neckSlide">
+    <label for="neckSlide">Neck Angle</label>
   </p>
   <p>
-    <input type="range" min="0" max="100" value="0" id="yellowSlide">
-    <label for="yellowSlide">Yellow Angle</label>
+    <input type="range" min="-45" max="45" value="0" id="headSlide">
+    <label for="headSlide">Head Side-to-Side Angle</label>
   </p>
   <p>
-    <input type="range" min="0" max="100" value="0" id="magentaSlide">
-    <label for="magentaSlide">Magenta Angle</label>
+    <input type="range" min="-45" max="45" value="0" id="leftThighSlide">
+    <label for="leftThighSlide">Left Thigh Angle</label>
   </p>
   <p>
-    <button type="button" id="animationYellowOnButton">Yellow Animation ON</button>
-    <button type="button" id="animationYellowOffButton">Yellow Animation OFF</button>
+    <input type="range" min="-45" max="45" value="0" id="leftLegSlide">
+    <label for="leftLegSlide">Left Back Leg Angle</label>
+  </p>
+  <p>
+    <input type="range" min="-45" max="45" value="0" id="leftFootSlide">
+    <label for="leftFootSlide">Left Foot Angle</label>
+  </p>
+  <p>
+    <input type="range" min="-45" max="45" value="0" id="rightThighSlide">
+    <label for="rightThighSlide">Right Thigh Angle</label>
+  </p>
+  <p>
+    <input type="range" min="-45" max="45" value="0" id="rightLegSlide">
+    <label for="rightLegSlide">Right Back Leg Angle</label>
+  </p>
+  <p>
+    <input type="range" min="-45" max="45" value="0" id="rightFootSlide">
+    <label for="rightFootSlide">Right Foot Angle</label>
+  </p>
+  <p>
+    <input type="range" min="-45" max="45" value="0" id="tailSlide">
+    <label for="tailSlide">Tail Wag Angle</label>
+  </p>
+  <p>
+    <button type="button" id="resetButton">Reset</button>
+  </p>
+  <p>
+    <button type="button" id="animationNeckOnButton">Neck Animation ON</button>
+    <button type="button" id="animationNeckOffButton">Neck Animation OFF</button>
+  </p>
+  <p>
+    <button type="button" id="animationHeadOnButton">Head Animation ON</button>
+    <button type="button" id="animationHeadOffButton">Head Animation OFF</button>
+  </p>
+  <p>
+    <button type="button" id="animationLeftLegOnButton">Left Leg Animation ON</button>
+    <button type="button" id="animationLeftLegOffButton">Left Leg Animation OFF</button>
+  </p>
+  <p>
+    <button type="button" id="animationRightLegOnButton">Right Leg Animation ON</button>
+    <button type="button" id="animationRightLegOffButton">Right Leg Animation OFF</button>
+  </p>
+  <p>
+    <button type="button" id="animationTailOnButton">Tail Animation ON</button>
+    <button type="button" id="animationTailOffButton">Tail Animation OFF</button>
   </p>
   <p id="numdot">fps</p>
-    <!-- JavaScript files -->
-    <script src="lib/webgl-utils.js"></script>
-    <script src="lib/webgl-debug.js"></script>
-    <script src="lib/cuon-utils.js"></script>
-    <script src="lib/cuon-matrix-cse160.js"></script>
-    <script src="Circle.js"></script>
-    <script src="Triangle.js"></script>
-    <script src="Point.js"></script>
-    <script src="Cube.js"></script>
-    <script src="BlockyAnimal.js"></script>
-  </body>
+  <!-- JavaScript files -->
+  <script src="lib/webgl-utils.js"></script>
+  <script src="lib/webgl-debug.js"></script>
+  <script src="lib/cuon-utils.js"></script>
+  <script src="lib/cuon-matrix-cse160.js"></script>
+  <script src="Circle.js"></script>
+  <script src="Triangle.js"></script>
+  <script src="Point.js"></script>
+  <script src="Cube.js"></script>
+  <script src="Sphere.js"></script>
+  <script src="BlockyAnimal.js"></script>
+</body>
 </html>
