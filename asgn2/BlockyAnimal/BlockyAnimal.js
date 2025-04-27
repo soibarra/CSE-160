@@ -1,3 +1,5 @@
+// ColoredPoint.js (c) 2012 matsuda
+// Vertex shader program
 var VSHADER_SOURCE = `
   attribute vec4 a_Position;
   uniform mat4 u_ModelMatrix;
@@ -6,6 +8,7 @@ var VSHADER_SOURCE = `
     gl_Position = u_GlobalRotateMatrix * u_ModelMatrix * a_Position;
   }`
 
+// Fragment shader program
 var FSHADER_SOURCE = `
   precision mediump float;
   uniform vec4 u_FragColor;
@@ -13,6 +16,7 @@ var FSHADER_SOURCE = `
     gl_FragColor = u_FragColor;
   }`
 
+//Global Variables
 let canvas;
 let gl;
 let a_Position;
@@ -20,10 +24,12 @@ let u_FragColor;
 let u_ModelMatrix;
 let u_GlobalRotateMatrix;
 
+//Constants
 const POINT = 0;
 const TRIANGLE = 1;
 const CIRCLE = 2;
 
+//Globals related UI elements
 let g_selectedColor = [1.0, 1.0, 1.0, 1.0];
 let g_selectedSize = 5;
 let g_selectedType = POINT;
@@ -53,10 +59,11 @@ let g_rightFrontLegAnimation = false;
 let g_tailAnimation = false;
 let g_spinAnimation = false;
 let g_spinAnimationTime = 0;
+let g_verticalOffset = 0;
 let g_mouseDown = false;
 let g_lastMouseX = null;
 
-function setupWebGL() {
+function setupWebGL() { //***dont change this for the rest of the quarter***
   canvas = document.getElementById('webgl');
   gl = canvas.getContext("webgl", { preserveDrawingBuffer: true });
   if (!gl) {
@@ -68,17 +75,20 @@ function setupWebGL() {
 }
 
 function connectVariablesToGLSL() {
+  // Initialize shaders
   if (!initShaders(gl, VSHADER_SOURCE, FSHADER_SOURCE)) {
     console.log('Failed to initialize shaders.');
     return;
   }
 
+  // Get the storage location of a_Position
   a_Position = gl.getAttribLocation(gl.program, 'a_Position');
   if (a_Position < 0) {
     console.log('Failed to get the storage location of a_Position');
     return;
   }
 
+  // Get the storage location of u_FragColor
   u_FragColor = gl.getUniformLocation(gl.program, 'u_FragColor');
   if (!u_FragColor) {
     console.log('Failed to get the storage location of u_FragColor');
@@ -101,7 +111,9 @@ function connectVariablesToGLSL() {
   gl.uniformMatrix4fv(u_ModelMatrix, false, identityM.elements);
 }
 
+// Set actions for the HTMl UI elements
 function addActionsForHtmlUI() {
+  //Button Events
   document.getElementById('animationNeckOnButton').onclick = function() { g_neckAnimation = true; };
   document.getElementById('animationNeckOffButton').onclick = function() { g_neckAnimation = false; };
   document.getElementById('animationHeadOnButton').onclick = function() { g_headAnimation = true; };
@@ -117,6 +129,7 @@ function addActionsForHtmlUI() {
   document.getElementById('animationTailOnButton').onclick = function() { g_tailAnimation = true; };
   document.getElementById('animationTailOffButton').onclick = function() { g_tailAnimation = false; };
 
+  //Sliders
   document.getElementById('neckSlide').addEventListener('input', function() { g_neckAngle = this.value; renderAllShapes(); });
   document.getElementById('headSlide').addEventListener('input', function() { g_headSideAngle = this.value; renderAllShapes(); });
   document.getElementById('leftThighSlide').addEventListener('input', function() { g_leftThighAngle = this.value; renderAllShapes(); });
@@ -137,8 +150,11 @@ function addActionsForHtmlUI() {
 }
 
 function main() {
+  //Set up canvas and gL variables
   setupWebGL();
+  // Set up GLSL shader programs and connect GLSL variables
   connectVariablesToGLSL();
+  
   addActionsForHtmlUI();
 
   canvas.onmousedown = function(ev) {
@@ -206,13 +222,18 @@ function updateAnimationAngles() {
   }
   if (g_spinAnimation) {
     g_spinAnimationTime += 0.1;
-    // Spin at a constant rate, e.g., 360 degrees over 4 seconds
-    g_globalAngle += 6; // 360 / (4 / 0.1) = 6 degrees per frame
-    g_globalAngle %= 360; // Keep angle in [0, 360)
+    const duration = 2 / 0.1;
+    // Spin: 180 degrees over 2 seconds
+    g_globalAngle += 180 / duration; // 180 / (2 / 0.1) degrees per frame
+    g_globalAngle %= 360;
     document.getElementById('angleSlide').value = g_globalAngle;
-    if (g_spinAnimationTime > 4 / 0.1) { // 4 seconds
+    // Jump: Use sine for smooth up-and-down motion, peaking at the halfway point
+    const progress = (g_spinAnimationTime * 0.1) / 2; // Normalize to [0, 1] over 2 seconds
+    g_verticalOffset = 0.5 * Math.sin(progress * Math.PI); // Peaks at 0.5 units at 1 second
+    if (g_spinAnimationTime > duration) { // 2 seconds
       g_spinAnimation = false;
       g_spinAnimationTime = 0;
+      g_verticalOffset = 0; // Reset vertical position
     }
   }
 }
@@ -235,11 +256,12 @@ function renderAllShapes() {
   globalRotMat.setRotate(180, 0, 1, 0);
   globalRotMat.rotate(g_tiltAngle, 1, 0, 0);
   globalRotMat.rotate(g_globalAngle, 0, 1, 0);
+  globalRotMat.translate(0, g_verticalOffset, 0); // Apply vertical offset for jump
   gl.uniformMatrix4fv(u_GlobalRotateMatrix, false, globalRotMat.elements);
 
   gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
-  // Test Cone (Red) at (0, 0, 0)
+  // Test Cone (Red) at (0, 0, 0) now the tail
   var Tail = new Cone();
   Tail.color = [0.686, 0.373, 0.216, 1.0];
   Tail.matrix = new Matrix4(bodyMatrix);
@@ -248,7 +270,7 @@ function renderAllShapes() {
   Tail.matrix.scale(0.2, 0.12, 0.35);
   Tail.render();
 
-  // Body: z = 0.3
+  // Body
   var Body = new Cube();
   Body.color = [0.847, 0.561, 0.239, 1.0];
   Body.matrix.translate(0, -0.25, 0.3);
@@ -256,16 +278,7 @@ function renderAllShapes() {
   Body.matrix.scale(0.4, 0.3, 0.8);
   Body.render();
 
-  /*/ Tail: z = 0.75
-  var Tail = new Cube();
-  Tail.color = [0.686, 0.373, 0.216, 1.0];
-  Tail.matrix = new Matrix4(bodyMatrix);
-  Tail.matrix.translate(0, 0.15, 0.45);
-  Tail.matrix.rotate(g_tailAngle, 0, 1, 0);
-  Tail.matrix.scale(0.1, 0.2, 0.1);
-  Tail.render();*/
-
-  // Right Thigh: z = 0.6
+  // Right Thigh
   var R_Thigh = new Cube();
   R_Thigh.color = [0.847, 0.561, 0.239, 1.0];
   R_Thigh.matrix = new Matrix4(bodyMatrix);
@@ -277,7 +290,7 @@ function renderAllShapes() {
   R_Thigh.matrix.scale(0.05, 0.31, 0.1);
   R_Thigh.render();
 
-  // Right Back Leg: z = 0.65
+  // Right Back Leg
   var R_BackLeg = new Cube();
   R_BackLeg.color = [0.847, 0.561, 0.239, 1.0];
   R_BackLeg.matrix = new Matrix4(rThighMatrix);
@@ -289,7 +302,7 @@ function renderAllShapes() {
   R_BackLeg.matrix.scale(0.1, 0.3, 0.1);
   R_BackLeg.render();
 
-  // Right Foot: z = 0.65
+  // Right Foot
   var R_Foot = new Cube();
   R_Foot.color = [0.4, 0.2, 0.1, 1.0];
   R_Foot.matrix = new Matrix4(rLegMatrix);
@@ -300,7 +313,7 @@ function renderAllShapes() {
   R_Foot.matrix.scale(0.1, 0.15, 0.1);
   R_Foot.render();
 
-  // Left Thigh: z = 0.6
+  // Left Thigh
   var L_Thigh = new Cube();
   L_Thigh.color = [0.847, 0.561, 0.239, 1.0];
   L_Thigh.matrix = new Matrix4(bodyMatrix);
@@ -312,7 +325,7 @@ function renderAllShapes() {
   L_Thigh.matrix.scale(0.05, 0.31, 0.1);
   L_Thigh.render();
 
-  // Left Back Leg: z = 0.65
+  // Left Back Leg
   var L_BackLeg = new Cube();
   L_BackLeg.color = [0.847, 0.561, 0.239, 1.0];
   L_BackLeg.matrix = new Matrix4(lThighMatrix);
@@ -324,7 +337,7 @@ function renderAllShapes() {
   L_BackLeg.matrix.scale(0.1, 0.3, 0.1);
   L_BackLeg.render();
 
-  // Left Foot: z = 0.65
+  // Left Foot
   var L_Foot = new Cube();
   L_Foot.color = [0.4, 0.2, 0.1, 1.0];
   L_Foot.matrix = new Matrix4(lLegMatrix);
@@ -335,7 +348,7 @@ function renderAllShapes() {
   L_Foot.matrix.scale(0.1, 0.15, 0.1);
   L_Foot.render();
 
-  // Right Shoulder: z = 0.05
+  // Right Shoulder
   var R_Shoulder = new Cube();
   R_Shoulder.color = [0.847, 0.561, 0.239, 1.0];
   R_Shoulder.matrix = new Matrix4(bodyMatrix);
@@ -343,7 +356,7 @@ function renderAllShapes() {
   R_Shoulder.matrix.scale(0.1, 0.05, 0.1);
   R_Shoulder.render();
 
-  // Left Shoulder: z = 0.05
+  // Left Shoulder
   var L_Shoulder = new Cube();
   L_Shoulder.color = [0.847, 0.561, 0.239, 1.0];
   L_Shoulder.matrix = new Matrix4(bodyMatrix);
@@ -351,7 +364,7 @@ function renderAllShapes() {
   L_Shoulder.matrix.scale(0.1, 0.05, 0.1);
   L_Shoulder.render();
 
-  // Right Front Upper Leg: z = -0.05
+  // Right Front Upper Leg
   var R_FrontUpperLeg = new Cube();
   R_FrontUpperLeg.color = [0.847, 0.561, 0.239, 1.0];
   R_FrontUpperLeg.matrix = new Matrix4(bodyMatrix);
@@ -363,7 +376,7 @@ function renderAllShapes() {
   R_FrontUpperLeg.matrix.scale(0.1, 0.2, 0.1);
   R_FrontUpperLeg.render();
 
-  // Right Front Lower Leg: z = -0.05
+  // Right Front Lower Leg
   var R_FrontLowerLeg = new Cube();
   R_FrontLowerLeg.color = [0.847, 0.561, 0.239, 1.0];
   R_FrontLowerLeg.matrix = new Matrix4(rFrontUpperMatrix);
@@ -375,7 +388,7 @@ function renderAllShapes() {
   R_FrontLowerLeg.matrix.scale(0.1, 0.2, 0.1);
   R_FrontLowerLeg.render();
 
-  // Right Front Foot: z = -0.05
+  // Right Front Foot
   var R_FrontFoot = new Cube();
   R_FrontFoot.color = [0.4, 0.2, 0.1, 1.0];
   R_FrontFoot.matrix = new Matrix4(rFrontLowerMatrix);
@@ -386,7 +399,7 @@ function renderAllShapes() {
   R_FrontFoot.matrix.scale(0.1, 0.15, 0.1);
   R_FrontFoot.render();
 
-  // Left Front Upper Leg: z = -0.05
+  // Left Front Upper Leg
   var L_FrontUpperLeg = new Cube();
   L_FrontUpperLeg.color = [0.847, 0.561, 0.239, 1.0];
   L_FrontUpperLeg.matrix = new Matrix4(bodyMatrix);
@@ -398,7 +411,7 @@ function renderAllShapes() {
   L_FrontUpperLeg.matrix.scale(0.1, 0.2, 0.1);
   L_FrontUpperLeg.render();
 
-  // Left Front Lower Leg: z = -0.05
+  // Left Front Lower Leg
   var L_FrontLowerLeg = new Cube();
   L_FrontLowerLeg.color = [0.847, 0.561, 0.239, 1.0];
   L_FrontLowerLeg.matrix = new Matrix4(lFrontUpperMatrix);
@@ -410,7 +423,7 @@ function renderAllShapes() {
   L_FrontLowerLeg.matrix.scale(0.1, 0.2, 0.1);
   L_FrontLowerLeg.render();
 
-  // Left Front Foot: z = -0.05
+  // Left Front Foot
   var L_FrontFoot = new Cube();
   L_FrontFoot.color = [0.4, 0.2, 0.1, 1.0];
   L_FrontFoot.matrix = new Matrix4(lFrontLowerMatrix);
@@ -421,7 +434,7 @@ function renderAllShapes() {
   L_FrontFoot.matrix.scale(0.1, 0.15, 0.1);
   L_FrontFoot.render();
 
-  // Neck: z = -0.2
+  // Neck
   var Neck = new Cube();
   Neck.color = [0.847, 0.561, 0.239, 1.0];
   Neck.matrix = new Matrix4(bodyMatrix);
@@ -433,7 +446,7 @@ function renderAllShapes() {
   Neck.matrix.scale(0.2, 0.3, 0.2);
   Neck.render();
 
-  // Head: z = -0.25
+  // Head
   var Head = new Cube();
   Head.color = [0.847, 0.561, 0.239, 1.0];
   Head.matrix = new Matrix4(neckMatrix);
@@ -445,7 +458,7 @@ function renderAllShapes() {
   Head.matrix.scale(0.2, 0.2, 0.3);
   Head.render();
 
-  // Nose1: z = -0.45
+  // Nose1
   var Nose1 = new Cube();
   Nose1.color = [0.847, 0.561, 0.239, 1.0];
   Nose1.matrix = new Matrix4(headMatrix);
@@ -453,7 +466,7 @@ function renderAllShapes() {
   Nose1.matrix.scale(0.2, 0.1, 0.1);
   Nose1.render();
 
-  // Nose2: z = -0.515
+  // Nose2
   var Nose2 = new Cube();
   Nose2.color = [0.4, 0.2, 0.1, 1.0];
   Nose2.matrix = new Matrix4(headMatrix);
@@ -461,10 +474,10 @@ function renderAllShapes() {
   Nose2.matrix.scale(0.2, 0.1, 0.03);
   Nose2.render();
 
-  // Antlers (relative to head)
+  // Antlers relative to head
   var antlerMatrix = new Matrix4(headMatrix);
 
-  // Cube14: z = -0.125
+  // Cube14
   var Cube14 = new Cube();
   Cube14.color = [0.655, 0.310, 0.180, 1.0];
   Cube14.matrix = new Matrix4(antlerMatrix);
@@ -472,7 +485,7 @@ function renderAllShapes() {
   Cube14.matrix.scale(0.05, 0.2, 0.05);
   Cube14.render();
 
-  // Cube15: z = -0.125
+  // Cube15
   var Cube15 = new Cube();
   Cube15.color = [0.655, 0.310, 0.180, 1.0];
   Cube15.matrix = new Matrix4(antlerMatrix);
@@ -480,7 +493,7 @@ function renderAllShapes() {
   Cube15.matrix.scale(0.05, 0.2, 0.05);
   Cube15.render();
 
-  // Cube16: z = -0.125
+  // Cube16
   var Cube16 = new Cube();
   Cube16.color = [0.655, 0.310, 0.180, 1.0];
   Cube16.matrix = new Matrix4(antlerMatrix);
@@ -488,7 +501,7 @@ function renderAllShapes() {
   Cube16.matrix.scale(0.05, 0.2, 0.05);
   Cube16.render();
 
-  // Cube17: z = -0.025
+  // Cube17
   var Cube17 = new Cube();
   Cube17.color = [0.655, 0.310, 0.180, 1.0];
   Cube17.matrix = new Matrix4(antlerMatrix);
@@ -496,7 +509,7 @@ function renderAllShapes() {
   Cube17.matrix.scale(0.05, 0.1, 0.25);
   Cube17.render();
 
-  // Cube18: z = 0.025
+  // Cube18
   var Cube18 = new Cube();
   Cube18.color = [0.655, 0.310, 0.180, 1.0];
   Cube18.matrix = new Matrix4(antlerMatrix);
@@ -504,7 +517,7 @@ function renderAllShapes() {
   Cube18.matrix.scale(0.05, 0.2, 0.05);
   Cube18.render();
 
-  // Cube19: z = -0.125
+  // Cube19
   var Cube19 = new Cube();
   Cube19.color = [0.655, 0.310, 0.180, 1.0];
   Cube19.matrix = new Matrix4(antlerMatrix);
@@ -512,7 +525,7 @@ function renderAllShapes() {
   Cube19.matrix.scale(0.05, 0.2, 0.05);
   Cube19.render();
 
-  // Cube20: z = -0.125
+  // Cube20
   var Cube20 = new Cube();
   Cube20.color = [0.655, 0.310, 0.180, 1.0];
   Cube20.matrix = new Matrix4(antlerMatrix);
@@ -520,7 +533,7 @@ function renderAllShapes() {
   Cube20.matrix.scale(0.05, 0.2, 0.05);
   Cube20.render();
 
-  // Cube21: z = -0.025
+  // Cube21
   var Cube21 = new Cube();
   Cube21.color = [0.655, 0.310, 0.180, 1.0];
   Cube21.matrix = new Matrix4(antlerMatrix);
@@ -528,7 +541,7 @@ function renderAllShapes() {
   Cube21.matrix.scale(0.05, 0.1, 0.25);
   Cube21.render();
 
-  // Cube22: z = -0.125
+  // Cube22
   var Cube22 = new Cube();
   Cube22.color = [0.655, 0.310, 0.180, 1.0];
   Cube22.matrix = new Matrix4(antlerMatrix);
@@ -536,7 +549,7 @@ function renderAllShapes() {
   Cube22.matrix.scale(0.05, 0.2, 0.05);
   Cube22.render();
 
-  // Cube23: z = 0.025
+  // Cube23
   var Cube23 = new Cube();
   Cube23.color = [0.655, 0.310, 0.180, 1.0];
   Cube23.matrix = new Matrix4(antlerMatrix);
@@ -562,8 +575,10 @@ var g_shapesList = [];
 function click(ev) {
   let [x, y] = convertCoordinatesEventToGL(ev);
   if (ev.shiftKey) {
-    g_spinAnimation = true;
-    g_spinAnimationTime = 0;
+    if (!g_spinAnimation) {
+      g_spinAnimation = true;
+      g_spinAnimationTime = 0;
+    }
   } else {
     let point;
     if (g_selectedType == POINT) {
