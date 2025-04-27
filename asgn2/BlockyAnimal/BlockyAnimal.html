@@ -1,3 +1,8 @@
+Sofia Ibarra
+soibarra@ucsc.edu
+
+Notes to Grader:
+
 <!DOCTYPE html>
 <html>
 <head>
@@ -49,11 +54,32 @@
     <label for="rightFootSlide">Right Foot Angle</label>
   </p>
   <p>
-    <input type="range" min="-45" max="45" value="0" id="tailSlide">
-    <label for="tailSlide">Tail Wag Angle</label>
+    <input type="range" min="-45" max="45" value="0" id="leftFrontUpperSlide">
+    <label for="leftFrontUpperSlide">Left Front Upper Leg Angle</label>
   </p>
   <p>
-    <button type="button" id="resetButton">Reset</button>
+    <input type="range" min="-45" max="45" value="0" id="leftFrontLowerSlide">
+    <label for="leftFrontLowerSlide">Left Front Lower Leg Angle</label>
+  </p>
+  <p>
+    <input type="range" min="-45" max="45" value="0" id="leftFrontFootSlide">
+    <label for="leftFrontFootSlide">Left Front Foot Angle</label>
+  </p>
+  <p>
+    <input type="range" min="-45" max="45" value="0" id="rightFrontUpperSlide">
+    <label for="rightFrontUpperSlide">Right Front Upper Leg Angle</label>
+  </p>
+  <p>
+    <input type="range" min="-45" max="45" value="0" id="rightFrontLowerSlide">
+    <label for="rightFrontLowerSlide">Right Front Lower Leg Angle</label>
+  </p>
+  <p>
+    <input type="range" min="-45" max="45" value="0" id="rightFrontFootSlide">
+    <label for="rightFrontFootSlide">Right Front Foot Angle</label>
+  </p>
+  <p>
+    <input type="range" min="-45" max="45" value="0" id="tailSlide">
+    <label for="tailSlide">Tail Wag Angle</label>
   </p>
   <p>
     <button type="button" id="animationNeckOnButton">Neck Animation ON</button>
@@ -64,12 +90,20 @@
     <button type="button" id="animationHeadOffButton">Head Animation OFF</button>
   </p>
   <p>
-    <button type="button" id="animationLeftLegOnButton">Left Leg Animation ON</button>
-    <button type="button" id="animationLeftLegOffButton">Left Leg Animation OFF</button>
+    <button type="button" id="animationLeftLegOnButton">Left Back Leg Animation ON</button>
+    <button type="button" id="animationLeftLegOffButton">Left Back Leg Animation OFF</button>
   </p>
   <p>
-    <button type="button" id="animationRightLegOnButton">Right Leg Animation ON</button>
-    <button type="button" id="animationRightLegOffButton">Right Leg Animation OFF</button>
+    <button type="button" id="animationRightLegOnButton">Right Back Leg Animation ON</button>
+    <button type="button" id="animationRightLegOffButton">Right Back Leg Animation OFF</button>
+  </p>
+  <p>
+    <button type="button" id="animationLeftFrontLegOnButton">Left Front Leg Animation ON</button>
+    <button type="button" id="animationLeftFrontLegOffButton">Left Front Leg Animation OFF</button>
+  </p>
+  <p>
+    <button type="button" id="animationRightFrontLegOnButton">Right Front Leg Animation ON</button>
+    <button type="button" id="animationRightFrontLegOffButton">Right Front Leg Animation OFF</button>
   </p>
   <p>
     <button type="button" id="animationTailOnButton">Tail Animation ON</button>
@@ -85,7 +119,7 @@
   <script src="Triangle.js"></script>
   <script src="Point.js"></script>
   <script src="Cube.js"></script>
-  <script src="Sphere.js"></script>
+  <script src="Cone.js"></script>
   <script src="BlockyAnimal.js"></script>
 </body>
 </html>
