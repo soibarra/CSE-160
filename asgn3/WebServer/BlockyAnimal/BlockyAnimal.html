@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Blocky Animal</title>
+  <style>
+    body {
+      display: flex;
+      flex-direction: row;
+      font-family: Arial, sans-serif;
+      margin: 20px;
+    }
+    #left-column {
+      margin-right: 20px;
+    }
+    #right-column {
+      display: flex;
+      flex-direction: column;
+      width: 100%;
+    }
+    #info-section {
+      margin-bottom: 20px;
+    }
+    .slider-group {
+      display: flex;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+    .slider-group label {
+      margin-right: 10px;
+      min-width: 150px;
+    }
+    .slider-group input[type="range"] {
+      margin-right: 10px;
+      width: 200px;
+    }
+    .slider-group button {
+      margin-right: 5px;
+    }
+    #numdot {
+      margin-top: 20px;
+    }
+  </style>
+</head>
+<body onload="main()">
+  <div id="left-column">
+    <canvas id="webgl" width="400" height="400">
+      Please use a browser that supports "canvas"
+    </canvas>
+    <div id="info-section">
+      <p>Sofia Ibarra</p>
+      <p>soibarra@ucsc.edu</p>
+      <p>Notes to Grader:</p>
+      <p>* Drag mouse on the canvas to change camera angle.</p>
+      <p>* Total of 29 cubes and 1 cone.</p>
+      <p>* Each antler has 5 cubes.</p>
+      <p>* Hold shift and click anywhere on the canvas for special animation.</p>
+      <p>* Used ChatGPT to help me organize the UI of the screen.</p>
+      </p>
+    </div>
+  </div>
+  <div id="right-column">
+    <div class="slider-group">
+      <label for="angleSlide">Camera Angle</label>
+      <input type="range" min="-180" max="180" value="0" id="angleSlide">
+    </div>
+    <div class="slider-group">
+      <label for="tiltSlide">Tilt Angle</label>
+      <input type="range" min="-90" max="90" value="30" id="tiltSlide">
+    </div>
+    <div class="slider-group">
+      <label for="neckSlide">Neck Angle</label>
+      <input type="range" min="-45" max="45" value="0" id="neckSlide">
+      <button type="button" id="animationNeckOnButton">ON</button>
+      <button type="button" id="animationNeckOffButton">OFF</button>
+    </div>
+    <div class="slider-group">
+      <label for="headSlide">Head Side-to-Side Angle</label>
+      <input type="range" min="-45" max="45" value="0" id="headSlide">
+      <button type="button" id="animationHeadOnButton">ON</button>
+      <button type="button" id="animationHeadOffButton">OFF</button>
+    </div>
+    <div class="slider-group">
+      <label for="leftThighSlide">Left Thigh Angle</label>
+      <input type="range" min="-45" max="45" value="0" id="leftThighSlide">
+      <button type="button" id="animationLeftLegOnButton">ON</button>
+      <button type="button" id="animationLeftLegOffButton">OFF</button>
+    </div>
+    <div class="slider-group">
+      <label for="leftLegSlide">Left Back Leg Angle</label>
+      <input type="range" min="-45" max="45" value="0" id="leftLegSlide">
+    </div>
+    <div class="slider-group">
+      <label for="leftFootSlide">Left Foot Angle</label>
+      <input type="range" min="-45" max="45" value="0" id="leftFootSlide">
+    </div>
+    <div class="slider-group">
+      <label for="rightThighSlide">Right Thigh Angle</label>
+      <input type="range" min="-45" max="45" value="0" id="rightThighSlide">
+      <button type="button" id="animationRightLegOnButton">ON</button>
+      <button type="button" id="animationRightLegOffButton">OFF</button>
+    </div>
+    <div class="slider-group">
+      <label for="rightLegSlide">Right Back Leg Angle</label>
+      <input type="range" min="-45" max="45" value="0" id="rightLegSlide">
+    </div>
+    <div class="slider-group">
+      <label for="rightFootSlide">Right Foot Angle</label>
+      <input type="range" min="-45" max="45" value="0" id="rightFootSlide">
+    </div>
+    <div class="slider-group">
+      <label for="leftFrontUpperSlide">Left Front Upper Leg Angle</label>
+      <input type="range" min="-45" max="45" value="0" id="leftFrontUpperSlide">
+      <button type="button" id="animationLeftFrontLegOnButton">ON</button>
+      <button type="button" id="animationLeftFrontLegOffButton">OFF</button>
+    </div>
+    <div class="slider-group">
+      <label for="leftFrontLowerSlide">Left Front Lower Leg Angle</label>
+      <input type="range" min="-45" max="45" value="0" id="leftFrontLowerSlide">
+    </div>
+    <div class="slider-group">
+      <label for="leftFrontFootSlide">Left Front Foot Angle</label>
+      <input type="range" min="-45" max="45" value="0" id="leftFrontFootSlide">
+    </div>
+    <div class="slider-group">
+      <label for="rightFrontUpperSlide">Right Front Upper Leg Angle</label>
+      <input type="range" min="-45" max="45" value="0" id="rightFrontUpperSlide">
+      <button type="button" id="animationRightFrontLegOnButton">ON</button>
+      <button type="button" id="animationRightFrontLegOffButton">OFF</button>
+    </div>
+    <div class="slider-group">
+      <label for="rightFrontLowerSlide">Right Front Lower Leg Angle</label>
+      <input type="range" min="-45" max="45" value="0" id="rightFrontLowerSlide">
+    </div>
+    <div class="slider-group">
+      <label for="rightFrontFootSlide">Right Front Foot Angle</label>
+      <input type="range" min="-45" max="45" value="0" id="rightFrontFootSlide">
+    </div>
+    <div class="slider-group">
+      <label for="tailSlide">Tail Wag Angle</label>
+      <input type="range" min="-45" max="45" value="0" id="tailSlide">
+      <button type="button" id="animationTailOnButton">ON</button>
+      <button type="button" id="animationTailOffButton">OFF</button>
+    </div>
+    <p id="numdot">fps</p>
+  </div>
+  <!-- JavaScript files -->
+  <script src="lib/webgl-utils.js"></script>
+  <script src="lib/webgl-debug.js"></script>
+  <script src="lib/cuon-utils.js"></script>
+  <script src="lib/cuon-matrix-cse160.js"></script>
+  <script src="Circle.js"></script>
+  <script src="Triangle.js"></script>
+  <script src="Point.js"></script>
+  <script src="Cube.js"></script>
+  <script src="Cone.js"></script>
+  <script src="BlockyAnimal.js"></script>
+</body>
+</html>

@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Blocky Animal</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+    }
+    #info-section {
+      margin-bottom: 20px;
+    }
+    #numdot {
+      margin-bottom: 10px;
+    }
+    /* optional border styling for clarity */
+    canvas { border: 1px solid #333; }
+  </style>
+</head>
+<body onload="main()">
+  <div id="left-column">
+    <!-- give the canvas a tabindex so it can get keyboard focus -->
+    <canvas id="webgl" width="400" height="400" tabindex="0">
+      Please use a browser that supports "canvas"
+    </canvas>
+    <p id="numdot">fps</p>
+    <div id="info-section">
+      <p>Sofia Ibarra</p>
+      <p>soibarra@ucsc.edu</p>
+      <p>Notes to Grader:</p>
+      <p>* Use A/D to move left/right, W/S to move forward/backward, Q/E to pan left/right.</p>
+      <p>* Use the up arrow key to jump.</p>
+      <p>GAME: Make your way throught maze to the red plaid pole in the center. Add or delete blocks along the way by clicking or holding 'x' key and clicking, respectively. Once you reach the pole, hold shift and click it for special explosion and a win message.</p>
+    </div>
+  </div>
+
+  <!-- JavaScript files -->
+  <script src="lib/webgl-utils.js"></script>
+  <script src="lib/webgl-debug.js"></script>
+  <script src="lib/cuon-utils.js"></script>
+  <script src="lib/cuon-matrix-cse160.js"></script>
+  <script src="Triangle.js"></script>
+  <script src="Point.js"></script>
+  <script src="Cube.js"></script>
+  <script src="Cone.js"></script>
+  <script src="Camera.js"></script>
+  <script src="World.js"></script>
+</body>
+</html>
