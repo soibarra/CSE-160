@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>My first three.js app</title>
+  <style>
+    body {
+      margin: 0;
+      display: flex;
+      height: 100vh;
+    }
+    #container {
+      display: flex;
+      width: 100vw;
+      height: 100vh;
+    }
+    #c {
+      width: 80vw;
+      height: 100vh;
+      display: block;
+    }
+    .controls {
+      width: 20vw;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-start;
+      align-items: center;
+      padding: 20px 10px;
+      box-sizing: border-box;
+      background-color: #f9f9f9;
+    }
+    #info-section {
+      margin-top: 80px;
+      margin-bottom: 10px;
+      font-size: 14px;
+      color: #333;
+    }
+    .controls button {
+      margin: 10px 0;
+      padding: 8px 16px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+  </style>
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "https://cdn.jsdelivr.net/npm/three@v0.177.0/build/three.module.js",
+        "three/addons/": "https://cdn.jsdelivr.net/npm/three@v0.177.0/examples/jsm/"
+      }
+    }
+  </script>
+  <script type="module">
+    import * as THREE from 'three';
+    
+    function main() {
+      const canvas = document.querySelector('#c');
+      const renderer = new THREE.WebGLRenderer({antialias: true, canvas});
+    }
+  </script>
+</head>
+
+<body>
+  <div id="container">
+    <canvas id="c"></canvas>
+    <div class="controls">
+      <div id="info-section">
+        <p>Sofia Ibarra</p>
+        <p>soibarra@ucsc.edu</p>
+        <p>Notes to Grader:</p>
+        <p>- Wow factor: The fog effect can be turned off and on using the buttons below.</p>
+        <p>- When fog is off, the skybox is visible as the background.</p>
+        <p>- near, far, and color controls the fog.</p>
+        <p>- Nore possible Wow factors: The scene includes bouncing spheres and a glowing orb.</p>
+        <p>- The scene also includes a textured 3D model of a spinning marble bust.</p>
+        <p>- Used four types of lights: Ambient Light (soft gray), Directional Light (sunlight and shadows), Point Light (lamp posts), and Hemisphere Light (sky/ground simulation).</p>
+        <p>- Use the WASD keys to move and click the canvas to enable pointer lock controls. Click esc button to disable pointer lock controls.</p>
+        <p>- 'Controls' drop down controls the shadows.</p>
+      </div>
+      <button id="fogOn">Toggle Fog On</button>
+      <button id="fogOff">Toggle Fog Off</button>
+    </div>
+  </div>
+  <script type="module" src="main.js"></script>
+</body>
+</html>
